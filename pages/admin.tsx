@@ -27,7 +27,7 @@ export default function Admin() {
     }, [globalDataAccount]);
 
     return (
-        <div className="flex flex-col justify-center items-center gap-4 w-[80%] pt-2">
+        <div className="flex flex-col justify-center items-center gap-4 w-full h-full pt-2 bg-black">
             <BasicButton onClick={initialize} text="Initialize" disabled={initialized} />
             <BasicButton onClick={() => modifyGlobalData(fee, releaseLength, maxTimeBetweenBids, releaseAmount)} text="Modify Global Data" />
             <div className="flex flex-row justify-center items-center gap-2">
