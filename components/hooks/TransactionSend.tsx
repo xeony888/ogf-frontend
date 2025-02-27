@@ -61,7 +61,7 @@ export function TransactionSendProvider({ children }: { children: React.ReactNod
             <div className="w-auto h-auto">
                 {children}
                 {sendingTransaction &&
-                    <div className="fixed bottom-0 z-50 left-0 m-4 border-2 border-green-500 rounded-lg w-auto gap-4 p-4 h-24 flex flex-row justify-center items-center text-white">
+                    <div className="fixed bottom-0 z-50 left-0 m-4 border-2 border-green-500 rounded-lg w-auto gap-4 p-4 h-24 flex flex-row justify-center items-center text-white bg-black">
                         {!transactionError && !transactionSuccess ?
                             <>
                                 <Spinner />
