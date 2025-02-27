@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ogf_lottery.json`.
  */
 export type OgfLottery = {
-  "address": "69pmuTnmGiGQnRrsVDC1m8vS7e6zHdnvvE6aTYvsYMKX",
+  "address": "8UWyANtHbbMfb4G4xkrCtHgzEQjo5dhrzFfAnroz3GtX",
   "metadata": {
     "name": "ogfLottery",
     "version": "0.1.0",
@@ -535,6 +535,10 @@ export type OgfLottery = {
         },
         {
           "name": "maxTimeBetweenBids",
+          "type": "u64"
+        },
+        {
+          "name": "releaseAmount",
           "type": "u64"
         }
       ]

@@ -16,7 +16,6 @@ export default function ProgramProvider({ children }: { children: React.ReactNod
     useEffect(() => {
         const provider = new AnchorProvider(connection, (window as any).solana);
         const program = new Program<OgfLottery>(idl as any, provider);
-        console.log(program, provider);
         setProgram(program);
         setProvider(provider);
     }, []);

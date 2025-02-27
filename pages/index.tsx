@@ -5,32 +5,54 @@ import GradientBorder from "@/components/GradientBorder";
 import { useProgramActions } from "@/components/hooks/ProgramActionsProvider";
 import { useProgramData } from "@/components/hooks/ProgramData";
 import LoadedText from "@/components/LoadedText";
-import { calculateBidCost, calculateNextReleaseAmount, DECIMALS } from "@/components/utils";
+import { calculateBidCost, calculateNextReleaseAmount, displayTokenValue } from "@/components/utils";
 import WalletButton from "@/components/WalletButton";
 import { useWallet } from "@solana/wallet-adapter-react";
 import BN from "bn.js";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
 
 
 
 type PageState = "INFO" | "BID" | "CLAIM" | "STATS"
 export default function Home() {
   const { publicKey } = useWallet();
-  const { amountToClaim, currentPoolAccount, globalDataAccount } = useProgramData();
+  const { amountToClaim, currentPoolAccount, globalDataAccount, mintData, userData } = useProgramData();
   const { claim, bid } = useProgramActions();
-  const [state, setState] = useState<PageState>("INFO");
-
+  const [state, setState] = useState<PageState>();
+  const router = useRouter();
+  useEffect(() => {
+    if (router && router.isReady) {
+      const { state } = router.query;
+      if (state) {
+        setState(state as any);
+      }
+    }
+  }, [router, router.isReady])
+  useEffect(() => {
+    if (state) {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, state },
+        },
+        undefined,
+        { shallow: true } // Prevents full page reload
+      );
+    }
+  }, [state]);
   const now: BN = useMemo(() => {
     return new BN(Date.now() / 1000);
   }, []);
   const bidCost: number = useMemo(() => {
     if (!currentPoolAccount || !globalDataAccount) return 0;
     return calculateBidCost(globalDataAccount.fee, new BN(currentPoolAccount.bids));
-  }, [currentPoolAccount]);
+  }, [currentPoolAccount, globalDataAccount]);
   const nextReleaseAmount: number = useMemo(() => {
-    if (!currentPoolAccount) return 0;
-    return calculateNextReleaseAmount(currentPoolAccount.releases.add(new BN(1)));
-  }, []);
+    if (!currentPoolAccount || !globalDataAccount || !mintData) return 0;
+    return calculateNextReleaseAmount(currentPoolAccount.releases.add(new BN(1)), globalDataAccount.releaseAmount, mintData.decimals);
+  }, [currentPoolAccount, globalDataAccount, mintData]);
+
   return (
     <div className="flex flex-col justify-center items-center gap-2 md:gap-3 xl:gap-6 px-3 md:px-6 mt-6 w-full h-full relative">
       {!publicKey &&
@@ -51,13 +73,14 @@ export default function Home() {
         <GradientBorder>
           <div className="w-full h-full flex flex-col justify-between items-center gap-3 md:gap-6">
             <p className="uppercase text-4xl lg:text-6xl font-extrabold">{state}</p>
-            {state === "INFO" ?
+            {state === "STATS" ?
               <></>
               :
               state === "BID" ?
                 <div className="flex flex-col justify-center items-center gap-2">
-                  <LoadedText start="Current Pool Balance" value={currentPoolAccount?.balance.toString()} />
-                  <LoadedText start="Current Bid Cost" value={bidCost.toString()} />
+                  <LoadedText start="Current Pool Balance" text="&%%& $OGF" value={displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} />
+                  <LoadedText start="Current Bid Cost" text="&%%& $SOL" value={bidCost.toString()} />
+                  <LoadedText start="Your Current Reward" text="&%%& $OGF" value={displayTokenValue(userData.currentReward, mintData?.decimals)} />
                   <BasicButton onClick={bid} text="Bid" />
                   <div className="flex flex-col justify-center items-center gap-2">
                     <p>Releasing {nextReleaseAmount} $OGF in</p>
@@ -71,7 +94,7 @@ export default function Home() {
                 :
                 state === "CLAIM" ?
                   <div className="flex flex-col justify-center items-center w-[50%] h-full gap-10">
-                    <BigText text="Claimable $OGF" number={amountToClaim.div(new BN(10 ** DECIMALS)).toString()} />
+                    <BigText text="Claimable $OGF" number={displayTokenValue(amountToClaim, mintData?.decimals)} />
                     <BasicButton onClick={claim} text="Claim" disabled={amountToClaim.eq(new BN(0))} disabledText="No OGF to claim" />
                   </div>
                   :

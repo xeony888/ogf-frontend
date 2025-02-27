@@ -22,6 +22,7 @@ export default function Countdown({ timeLeft }: { timeLeft: number; }) {
                 setSeconds(prev => prev + 1);
             }, 1000);
         } else {
+            setNegative(false);
             setSeconds(timeLeft);
             interval = setInterval(() => {
                 setSeconds(prev => {

@@ -9,7 +9,18 @@
 
 body {
   font-family: "RobotoMono";
+  background-color: black;
+  /* Fallback */
+  background-image: url('/big-coin.png');
+  background-size: 100px 100px;
+  /* Adjust tile size */
+  background-repeat: repeat;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Create a second background layer for individual vibrations */
+
 
 html {
   color: white;
