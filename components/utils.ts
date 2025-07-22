@@ -3,6 +3,9 @@ import BN from "bn.js";
 
 export function calculateReward(bids: BN, id: BN, amount: BN): BN {
     id = id.add(new BN(1))
+    if (bids.eq(id) && id.eq(new BN(1))) {
+        return amount
+    }
     if (bids.eq(id)) {
         return amount.div(new BN(2))
     } else {

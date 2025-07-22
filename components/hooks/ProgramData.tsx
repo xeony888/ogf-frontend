@@ -156,7 +156,7 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 balance: new BN(released),
             })
         } else if (release) {
-            const released = calculateNextReleaseAmountRaw(currentPoolAccount.releases, globalDataAccount.releaseAmount);
+            const released = calculateNextReleaseAmountRaw(currentPoolAccount.releases.add(new BN(1)), globalDataAccount.releaseAmount);
             setCurrentPoolAccount(curr => {
                 return {
                     ...curr,
