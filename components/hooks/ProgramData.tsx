@@ -14,13 +14,13 @@ type GlobalData = {
     releaseLength: InstanceType<typeof BN>,
     maxTimeBetweenBids: InstanceType<typeof BN>,
     releaseAmount: InstanceType<typeof BN>,
+    totalReleases: InstanceType<typeof BN>
 }
 type PoolAccount = {
     id: number,
     bidDeadline: InstanceType<typeof BN>,
     bids: number,
     releaseTime: InstanceType<typeof BN>,
-    releases: InstanceType<typeof BN>,
     balance: InstanceType<typeof BN>,
 }
 type ClaimAccount = {
@@ -151,16 +151,14 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 id: globalDataAccount.pools,
                 bidDeadline: time.add(globalDataAccount.maxTimeBetweenBids),
                 bids: 1,
-                releases: new BN(1),
                 releaseTime: time.add(globalDataAccount.releaseLength),
                 balance: new BN(released),
             })
         } else if (release) {
-            const released = calculateNextReleaseAmountRaw(currentPoolAccount.releases.add(new BN(1)), globalDataAccount.releaseAmount);
+            const released = calculateNextReleaseAmountRaw(globalDataAccount.totalReleases.add(new BN(1)), globalDataAccount.releaseAmount);
             setCurrentPoolAccount(curr => {
                 return {
                     ...curr,
-                    releases: curr.releases.add(new BN(1)),
                     balance: curr.balance.add(released),
                     bids: curr.bids + 1,
                     releaseTime: time.add(globalDataAccount.releaseLength),

@@ -1,5 +1,5 @@
 {
-  "address": "DAt2Ygum6uhxZsTChUgzHQ53i7xy3BbuE4512GHVLbeg",
+  "address": "7o7SxHyXoFWsfbxeWopHWPvawwEFFfW1mTSw31NtuLJA",
   "metadata": {
     "name": "ogf_lottery",
     "version": "0.1.0",
@@ -912,6 +912,10 @@
           {
             "name": "mint",
             "type": "pubkey"
+          },
+          {
+            "name": "total_releases",
+            "type": "u64"
           }
         ]
       }
@@ -935,10 +939,6 @@
           },
           {
             "name": "release_time",
-            "type": "u64"
-          },
-          {
-            "name": "releases",
             "type": "u64"
           },
           {

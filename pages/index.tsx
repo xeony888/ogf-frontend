@@ -50,7 +50,7 @@ export default function Home() {
   }, [currentPoolAccount, globalDataAccount]);
   const nextReleaseAmount: number = useMemo(() => {
     if (!currentPoolAccount || !globalDataAccount || !mintData) return 0;
-    return calculateNextReleaseAmount(currentPoolAccount.releases.add(new BN(1)), globalDataAccount.releaseAmount, mintData.decimals);
+    return calculateNextReleaseAmount(globalDataAccount.totalReleases.add(new BN(1)), globalDataAccount.releaseAmount, mintData.decimals);
   }, [currentPoolAccount, globalDataAccount, mintData]);
 
   return (
@@ -78,9 +78,10 @@ export default function Home() {
               :
               state === "BID" ?
                 <div className="flex flex-col justify-center items-center gap-2">
-                  <LoadedText start="Current Pool Balance" text="&%%& $OGF" value={displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} />
-                  <LoadedText start="Current Bid Cost" text="&%%& $SOL" value={bidCost.toString()} />
-                  <LoadedText start="Your Current Reward" text="&%%& $OGF" value={displayTokenValue(userData.currentReward, mintData?.decimals)} />
+                  <LoadedText start="Number of Bids" value={currentPoolAccount.bids} />
+                  <LoadedText start="Pool Reward" text="&%%& $OGF" value={displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} />
+                  <LoadedText start="Lottery Reward" text="&%%& $OGF" value={displayTokenValue(userData.currentReward, mintData?.decimals)} />
+                  <LoadedText start="Lottery Cost" text="&%%& $SOL" value={bidCost.toString()} />
                   <BasicButton onClick={bid} text="Bid" />
                   <div className="flex flex-col justify-center items-center gap-2">
                     <p>Releasing {nextReleaseAmount} $OGF in</p>
@@ -98,12 +99,42 @@ export default function Home() {
                     <BasicButton onClick={claim} text="Claim" disabled={amountToClaim.eq(new BN(0))} disabledText="No OGF to claim" />
                   </div>
                   :
-                  <></>
+                  <div className="flex flex-col justify-between items-center text-center w-full h-full">
+                    <p>
+                      Welcome to the OG Lottery. The Lottery dispenses <ImportantSpan>$OGF</ImportantSpan>, the primal degeneracy of the Realm.
+                    </p>
+                    <p>
+                      <ImportantSpan>80% (800T) $OGF</ImportantSpan> is forever allocated to the lottery.
+                    </p>
+                    <p>
+                      Releases equal <ImportantSpan>1 B $OGF</ImportantSpan>, increasing linearly at a pace of <ImportantSpan>1 B $OGF</ImportantSpan> each epoch. Epochs last for <ImportantSpan>24 hours</ImportantSpan> beginning at <ImportantSpan>00:00 UTC</ImportantSpan>.
+                    </p>
+                    <p>
+                      <ImportantSpan>50%</ImportantSpan> of $OGF rewards are awarded to the Final Bid, and the remaining <ImportantSpan>50%</ImportantSpan> of $OGF is awarded to the losing bids, proportional to bid count. Wallets can bid on a Lottery Pool any number of times. Bid cost increases with each new bid for the length of the Lottery Pool. Difficulty resets each new Pool. Final Bid is determined when a full epoch passes without a Bid.
+                    </p>
+                    <p>
+                      Lottery fees are currently paid in <ImportantSpan>$SOL</ImportantSpan>. <ImportantSpan>$OGG</ImportantSpan> and <ImportantSpan>$OGC</ImportantSpan> will soon be allowed.
+                    </p>
+                    <p>
+                      <ImportantSpan>100% of lottery fees</ImportantSpan> collected go towards repurchasing <ImportantSpan>$OGF</ImportantSpan> from the open market to be burned. <ImportantSpan>$OGF</ImportantSpan> awarded but unclaimed after <ImportantSpan>10 epochs</ImportantSpan> is burned.
+                    </p>
+                    <p>
+                      <ImportantSpan>Those with $OGF bags will test fate and fortune in the Realm of OGs</ImportantSpan>
+                    </p>
+                  </div>
             }
             <p>Pool 0x{globalDataAccount?.pools.toString(16)}</p>
           </div>
         </GradientBorder>
       </div>
     </div>
+  );
+}
+
+function ImportantSpan({ children }: { children: React.ReactNode; }) {
+  return (
+    <span className="text-green-500 font-extrabold drop-shadow-lg">
+      {children}
+    </span>
   );
 }

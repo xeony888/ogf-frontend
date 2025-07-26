@@ -15,8 +15,8 @@ export function calculateReward(bids: BN, id: BN, amount: BN): BN {
 export function calculateBidCost(fee: BN, num: BN): number {
     return fee.mul(num.pow(new BN(2))).toNumber() / LAMPORTS_PER_SOL;
 }
-export function calculateNextReleaseAmountRaw(releases: BN, releaseAmount: BN) {
-    return releaseAmount.mul(releases.pow(new BN(2)))
+export function calculateNextReleaseAmountRaw(releases: BN, releaseAmount: BN): BN {
+    return releaseAmount.mul(releases);
 }
 export function calculateNextReleaseAmount(releases: BN, releaseAmount: BN, decimals: number): number {
     return Number((releaseAmount.toNumber() * (releases.pow(new BN(2)).toNumber() / (10 ** decimals))).toFixed(decimals));
