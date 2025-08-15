@@ -84,11 +84,11 @@ export default function Home() {
                   <LoadedText start="Lottery Cost" text="&%%& $SOL" value={bidCost.toString()} />
                   <BasicButton onClick={bid} text="Bid" />
                   <div className="flex flex-col justify-center items-center gap-2">
-                    <p>Releasing {nextReleaseAmount} $OGF in</p>
+                    <p>{nextReleaseAmount} $OGF to be released in</p>
                     <Countdown timeLeft={currentPoolAccount?.releaseTime.sub(now).toNumber() || 0} />
                   </div>
                   <div className="flex flex-col justify-center items-center gap-2">
-                    <p>Time left to bid before expiry</p>
+                    <p>Current pool expires in</p>
                     <Countdown timeLeft={currentPoolAccount?.bidDeadline.sub(now).toNumber() || 0} />
                   </div>
                 </div>
