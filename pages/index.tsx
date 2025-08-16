@@ -78,7 +78,7 @@ export default function Home() {
               :
               state === "BID" ?
                 <div className="flex flex-col justify-center items-center gap-2">
-                  <LoadedText start="Number of Bids" value={currentPoolAccount.bids} />
+                  <LoadedText start="Number of Bids" value={currentPoolAccount?.bids} />
                   <LoadedText start="Pool Reward" text="&%%& $OGF" value={displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} />
                   <LoadedText start="Lottery Reward" text="&%%& $OGF" value={displayTokenValue(userData.currentReward, mintData?.decimals)} />
                   <LoadedText start="Lottery Cost" text="&%%& $SOL" value={bidCost.toString()} />

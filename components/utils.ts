@@ -19,7 +19,8 @@ export function calculateNextReleaseAmountRaw(releases: BN, releaseAmount: BN): 
     return releaseAmount.mul(releases);
 }
 export function calculateNextReleaseAmount(releases: BN, releaseAmount: BN, decimals: number): number {
-    return Number((releaseAmount.toNumber() * (releases.pow(new BN(2)).toNumber() / (10 ** decimals))).toFixed(decimals));
+    const realReleases = releases.eq(new BN(0)) ? 1 : releases.toNumber()
+    return Number((releaseAmount.toNumber() * realReleases / (10 ** decimals)).toFixed(decimals));
 }
 export function displayTokenValue(value: BN | undefined, decimals: number | undefined): string {
     if (!value || decimals === undefined) return undefined;

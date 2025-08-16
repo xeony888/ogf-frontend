@@ -75,6 +75,7 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
             (async () => {
                 const programTokenAccount = await getAccount(connection, programTokenAccountAddress);
                 const globalDataAccount = await program.account.globalData.fetch(globalDataAccountAddress);
+                console.log(globalDataAccount.totalReleases.toNumber())
                 setGlobalDataAccount(globalDataAccount)
                 setProgramTokenBalance(programTokenAccount.amount);
             })()
@@ -90,6 +91,7 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 const poolAccount = await program.account.pool.fetch(poolAccountAddress);
                 setCurrentPoolAccount(poolAccount)
                 const data = await getMint(connection, globalDataAccount.mint);
+                console.log({ mintData: data })
                 setMintData(data);
             })();
         }
@@ -165,6 +167,12 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                     bidDeadline: time.add(globalDataAccount.maxTimeBetweenBids)
                 }
             });
+            setGlobalDataAccount(global => {
+                return {
+                    ...global,
+                    totalReleases: global.totalReleases.add(new BN(1))
+                }
+            })
         } else {
             setCurrentPoolAccount(curr => {
                 return {

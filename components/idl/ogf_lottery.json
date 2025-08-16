@@ -1,5 +1,5 @@
 {
-  "address": "7o7SxHyXoFWsfbxeWopHWPvawwEFFfW1mTSw31NtuLJA",
+  "address": "FHpLFdeSmCerfKGoVvs6cRgRh7vuGipbUBfu7MPA2G62",
   "metadata": {
     "name": "ogf_lottery",
     "version": "0.1.0",
@@ -651,6 +651,7 @@
         },
         {
           "name": "global_data_account",
+          "writable": true,
           "pda": {
             "seeds": [
               {
