@@ -149,9 +149,10 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 }
             })
             const released = calculateNextReleaseAmountRaw(new BN(0), globalDataAccount.releaseAmount);
+            const newBidDeadline = time.div(globalDataAccount.maxTimeBetweenBids).addn(2).mul(globalDataAccount.maxTimeBetweenBids)
             setCurrentPoolAccount({
                 id: globalDataAccount.pools,
-                bidDeadline: time.add(globalDataAccount.maxTimeBetweenBids),
+                bidDeadline: newBidDeadline,
                 bids: 1,
                 releaseTime: time.add(globalDataAccount.releaseLength),
                 balance: new BN(released),
@@ -176,10 +177,11 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
             })
         } else {
             setCurrentPoolAccount(curr => {
+                const newBidDeadline = time.div(globalDataAccount.maxTimeBetweenBids).addn(2).mul(globalDataAccount.maxTimeBetweenBids)
                 return {
                     ...curr,
                     bids: curr.bids + 1,
-                    bidDeadline: time.add(globalDataAccount.maxTimeBetweenBids),
+                    bidDeadline: newBidDeadline,
                 }
             })
         }
