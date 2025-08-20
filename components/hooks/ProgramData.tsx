@@ -157,14 +157,15 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 balance: new BN(released),
             })
         } else if (release) {
-            const released = calculateNextReleaseAmountRaw(globalDataAccount.totalReleases.add(new BN(1)), globalDataAccount.releaseAmount);
+            const released = calculateNextReleaseAmountRaw(globalDataAccount.totalReleases.addn(1), globalDataAccount.releaseAmount);
             setCurrentPoolAccount(curr => {
+                const newBidDeadline = time.div(globalDataAccount.maxTimeBetweenBids).addn(2).mul(globalDataAccount.maxTimeBetweenBids)
                 return {
                     ...curr,
                     balance: curr.balance.add(released),
                     bids: curr.bids + 1,
                     releaseTime: time.add(globalDataAccount.releaseLength),
-                    bidDeadline: time.add(globalDataAccount.maxTimeBetweenBids)
+                    bidDeadline: newBidDeadline
                 }
             });
             setGlobalDataAccount(global => {
