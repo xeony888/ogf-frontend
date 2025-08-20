@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ogf_lottery.json`.
  */
 export type OgfLottery = {
-  "address": "FHpLFdeSmCerfKGoVvs6cRgRh7vuGipbUBfu7MPA2G62",
+  "address": "9oDHyf7QQvYEf7eZr9BPiAcuitLV6ZTQVskVqajNwbGA",
   "metadata": {
     "name": "ogfLottery",
     "version": "0.1.0",
