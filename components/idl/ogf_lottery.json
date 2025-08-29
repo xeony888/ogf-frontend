@@ -1,5 +1,5 @@
 {
-  "address": "BtZ6LuVh4nSDQvTVhb9JMm8aaq1nbj9YBJxN2CXK8MzB",
+  "address": "4m3mXCycberAPBPDWJEsejEMPy48Abfs8Hk5sp5ofmX5",
   "metadata": {
     "name": "ogf_lottery",
     "version": "0.1.0",
@@ -215,6 +215,24 @@
                   117,
                   116,
                   104
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "global_data_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
                 ]
               }
             ]
@@ -533,6 +551,10 @@
         },
         {
           "name": "release_amount",
+          "type": "u64"
+        },
+        {
+          "name": "claim_expiry_time",
           "type": "u64"
         }
       ]
@@ -881,6 +903,10 @@
           {
             "name": "bidder",
             "type": "pubkey"
+          },
+          {
+            "name": "time",
+            "type": "u64"
           }
         ]
       }
@@ -916,6 +942,10 @@
           },
           {
             "name": "total_releases",
+            "type": "u64"
+          },
+          {
+            "name": "claim_expiry_time",
             "type": "u64"
           }
         ]

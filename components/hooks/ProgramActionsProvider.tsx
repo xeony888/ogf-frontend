@@ -1,17 +1,19 @@
 import { createContext, DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES, useContext } from "react";
 import { useProgram } from "./ProgramProvider";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useTransactionSend } from "./TransactionSend";
 import { BN } from "bn.js";
 import { useProgramData } from "./ProgramData";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { calculateBidCost, jupiterSwapTx, jupQuote, transactionSenderAndConfirmationWaiter } from "../utils";
+import { Wallet } from "@coral-xyz/anchor";
 
 
 type ProgramActionsProps = {
     initialize: () => Promise<void>,
-    modifyGlobalData: (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number) => Promise<void>
-    bid: () => Promise<void>,
+    modifyGlobalData: (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number, claimExpiryTime: number) => Promise<void>
+    bid: (usingOgc: boolean) => Promise<void>,
     claim: () => Promise<void>,
     deposit: (amount: number) => Promise<void>,
     withdraw: (amount: number) => Promise<void>,
@@ -21,6 +23,7 @@ export default function ProgramActionsProvider({ children }: { children: React.R
     const { publicKey } = useWallet();
     const { program, provider } = useProgram();
     const { sendTransaction } = useTransactionSend();
+    const { connection } = useConnection()
     const { globalDataAccount, currentPoolAccount, userClaimAccounts, mintData, setOnBid, setOnClaim } = useProgramData();
     const initialize = async () => {
         const transaction = await program.methods.initialize().accounts({
@@ -28,17 +31,32 @@ export default function ProgramActionsProvider({ children }: { children: React.R
         }).transaction();
         await sendTransaction(transaction);
     }
-    const modifyGlobalData = async (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number) => {
-        const transaction = await program.methods.modifyGlobalData(new BN(fee), new BN(releaseLength), new BN(maxTimeBetweenBids), new BN(releaseAmount)).accounts({
+    const modifyGlobalData = async (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number, claimExpiryTime: number) => {
+        const transaction = await program.methods.modifyGlobalData(new BN(fee), new BN(releaseLength), new BN(maxTimeBetweenBids), new BN(releaseAmount), new BN(claimExpiryTime)).accounts({
             signer: publicKey
         }).transaction();
         await sendTransaction(transaction);
     }
-    const bid = async () => {
+    const bid = async (usingOgc: boolean) => {
         const transaction = new Transaction();
         const time = new BN(Math.floor(Date.now() / 1000));
         let didRelease = false;
         let epoch = false;
+        if (usingOgc) {
+            const bidCost = calculateBidCost(globalDataAccount.fee, new BN(currentPoolAccount.bids))
+            const transaction = await jupiterSwapTx(bidCost, publicKey);
+            const latestBlockHash = await connection.getLatestBlockhash();
+            console.log("here");
+            // Execute the transaction
+            const tx = await provider.wallet.signTransaction(transaction);
+            const rawTransaction = tx.serialize();
+            const result = await transactionSenderAndConfirmationWaiter({
+                connection,
+                serializedTransaction: rawTransaction as any,
+                blockhashWithExpiryBlockHeight: latestBlockHash
+            });
+            console.log(result?.transaction?.signatures)
+        }
         if (time.gt(currentPoolAccount.bidDeadline)) {
             epoch = true;
             didRelease = true;

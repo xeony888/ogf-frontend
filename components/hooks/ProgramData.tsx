@@ -15,6 +15,7 @@ type GlobalData = {
     maxTimeBetweenBids: InstanceType<typeof BN>,
     releaseAmount: InstanceType<typeof BN>,
     totalReleases: InstanceType<typeof BN>
+    claimExpiryTime: InstanceType<typeof BN>
 }
 type PoolAccount = {
     id: number,
@@ -119,17 +120,20 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 claimAccounts = claimAccounts.filter((account) => account.account.pool !== globalDataAccount.pools);
                 let amountToClaim = new BN(0);
                 for (const account of claimAccounts) {
-                    let poolAccount = poolsMap.get(account.account.pool);
-                    if (!poolAccount) {
-                        const [poolAddress] = PublicKey.findProgramAddressSync(
-                            [Buffer.from("pool"), new BN(account.account.pool).toArrayLike(Buffer, "le", 2)],
-                            program.programId
-                        );
-                        poolAccount = await program.account.pool.fetch(poolAddress);
-                        poolsMap.set(account.account.pool, poolAccount);
+                    if (account.account.time.add(globalDataAccount.claimExpiryTime).gtn(Math.floor(Date.now() / 1000))) {
+                        let poolAccount = poolsMap.get(account.account.pool);
+                        if (!poolAccount) {
+                            const [poolAddress] = PublicKey.findProgramAddressSync(
+                                [Buffer.from("pool"), new BN(account.account.pool).toArrayLike(Buffer, "le", 2)],
+                                program.programId
+                            );
+                            poolAccount = await program.account.pool.fetch(poolAddress);
+                            poolsMap.set(account.account.pool, poolAccount);
+                        }
+
+                        const amount = calculateReward(new BN(poolAccount.bids), new BN(account.account.bidId), poolAccount.balance);
+                        amountToClaim = amountToClaim.add(amount);
                     }
-                    const amount = calculateReward(new BN(poolAccount.bids), new BN(account.account.bidId), poolAccount.balance);
-                    amountToClaim = amountToClaim.add(amount);
                 }
                 setUserClaimAccounts(claimAccounts.map(account => account.account));
                 setAmountToClaim(amountToClaim);

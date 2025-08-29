@@ -20,7 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <TransactionSendProvider>
               <ProgramDataProvider>
                 <ProgramActionsProvider>
-                  <div className="flex flex-col justify-start items-center w-full h-screen " style={{ backgroundImage: `url("/coin-spin-slow.gif")`, backgroundSize: "5%" }}>
+                  <div className="flex flex-col justify-start items-center w-full h-screen overflow-y-auto" style={{ backgroundImage: `url("/coin-spin-slow.gif")`, backgroundSize: "5%" }}>
                     <NavBar />
                     <Component {...pageProps} />
                   </div>

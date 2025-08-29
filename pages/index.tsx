@@ -5,7 +5,8 @@ import GradientBorder from "@/components/GradientBorder";
 import { useProgramActions } from "@/components/hooks/ProgramActionsProvider";
 import { useProgramData } from "@/components/hooks/ProgramData";
 import LoadedText from "@/components/LoadedText";
-import { calculateBidCost, calculateNextReleaseAmount, displayTokenValue } from "@/components/utils";
+import Toggle from "@/components/Toggle";
+import { calculateBidCost, calculateNextReleaseAmount, displayTokenValue, jupQuote } from "@/components/utils";
 import WalletButton from "@/components/WalletButton";
 import { useWallet } from "@solana/wallet-adapter-react";
 import BN from "bn.js";
@@ -20,7 +21,28 @@ export default function Home() {
   const { amountToClaim, currentPoolAccount, globalDataAccount, mintData, userData } = useProgramData();
   const { claim, bid } = useProgramActions();
   const [state, setState] = useState<PageState>();
+  const [poolRewardUSD, setPoolRewardUSD] = useState<string>("");
+  const [lotteryRewardUSD, setLotteryRewardUSD] = useState<string>("")
+  const [solCostUSD, setSolCostUSD] = useState<string>("")
+  const [usingOgc, setUsingOgc] = useState<boolean>(false)
+
   const router = useRouter();
+  useEffect(() => {
+    if (userData && currentPoolAccount && mintData) {
+      (async () => {
+        const poolRewardAmount = currentPoolAccount.balance.divn(10 ** mintData.decimals).toNumber()
+        const poolRewardQuote = await jupQuote("EQyRaajDZLEEdSrU8Hws29LWjDJczGKB1CV6jrWcZJn9", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", poolRewardAmount)
+        const lotteryRewardAmount = userData.currentReward.divn(10 ** mintData.decimals).toNumber()
+        const lotteryRewardQuote = await jupQuote("EQyRaajDZLEEdSrU8Hws29LWjDJczGKB1CV6jrWcZJn9", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", lotteryRewardAmount)
+        const bidCost = calculateBidCost(globalDataAccount.fee, new BN(currentPoolAccount.bids))
+        const solCostQuote = await jupQuote("So11111111111111111111111111111111111111112", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", bidCost)
+        console.log({ cost: solCostQuote.outAmount })
+        setSolCostUSD((solCostQuote.outAmount / 10 ** 6).toFixed(2))
+        setLotteryRewardUSD((lotteryRewardQuote.outAmount / 10 ** 6).toFixed(2))
+        setPoolRewardUSD((poolRewardQuote.outAmount / 10 ** 6).toFixed(2))
+      })()
+    }
+  }, [userData, currentPoolAccount, mintData])
   useEffect(() => {
     if (router && router.isReady) {
       const { state } = router.query;
@@ -48,11 +70,14 @@ export default function Home() {
     if (!currentPoolAccount || !globalDataAccount) return 0;
     return calculateBidCost(globalDataAccount.fee, new BN(currentPoolAccount.bids));
   }, [currentPoolAccount, globalDataAccount]);
+
   const nextReleaseAmount: number = useMemo(() => {
     if (!currentPoolAccount || !globalDataAccount || !mintData) return 0;
     return calculateNextReleaseAmount(globalDataAccount.totalReleases.add(new BN(1)), globalDataAccount.releaseAmount, mintData.decimals);
   }, [currentPoolAccount, globalDataAccount, mintData]);
-
+  const onBid = async () => {
+    await bid(usingOgc)
+  }
   return (
     <div className="flex flex-col justify-center items-center gap-2 md:gap-3 xl:gap-6 px-3 md:px-6 mt-6 w-full h-full relative">
       {!publicKey &&
@@ -79,10 +104,14 @@ export default function Home() {
               state === "BID" ?
                 <div className="flex flex-col justify-center items-center gap-2">
                   <LoadedText start="Number of Bids" value={currentPoolAccount?.bids} />
-                  <LoadedText start="Pool Reward" text="&%%& $OGF" value={displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} />
-                  <LoadedText start="Lottery Reward" text="&%%& $OGF" value={displayTokenValue(userData.currentReward, mintData?.decimals)} />
-                  <LoadedText start="Lottery Cost" text="&%%& $SOL" value={bidCost.toString()} />
-                  <BasicButton onClick={bid} text="Bid" />
+                  <LoadedText start="Pool Reward" value={currentPoolAccount?.balance && poolRewardUSD ? `${displayTokenValue(currentPoolAccount?.balance, mintData?.decimals)} $OGF | $${poolRewardUSD}` : undefined} />
+                  <LoadedText start="Lottery Reward" value={userData?.currentReward && lotteryRewardUSD ? `${displayTokenValue(userData.currentReward, mintData?.decimals)} $OGF | $${lotteryRewardUSD}` : undefined} />
+                  <LoadedText start="Lottery Cost" value={bidCost && solCostUSD ? `${bidCost.toString()} $SOL | $${solCostUSD}` : undefined} />
+                  <BasicButton onClick={onBid} text="Bid" />
+                  <div className="flex flex-row justify-center items-center gap-2">
+                    <p>Using {usingOgc ? "$OGC" : "SOL"} to pay mining fees</p>
+                    <Toggle checked={usingOgc} onChange={setUsingOgc} />
+                  </div>
                   <div className="flex flex-col justify-center items-center gap-2">
                     <p>{nextReleaseAmount} $OGF to be released in</p>
                     <Countdown timeLeft={currentPoolAccount?.releaseTime.sub(now).toNumber() || 0} />

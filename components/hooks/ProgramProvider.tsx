@@ -1,17 +1,17 @@
 
-import { AnchorProvider, Program, Provider } from "@coral-xyz/anchor";
+import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import idl from "../idl/ogf_lottery.json";
 import { OgfLottery } from "../idl/ogf_lottery";
 import { useConnection } from "@solana/wallet-adapter-react";
 type ProgramProps = {
-    provider: Provider,
+    provider: AnchorProvider,
     program: Program<OgfLottery>
 }
 const ProgramContext = createContext<ProgramProps>({} as ProgramProps);
 export default function ProgramProvider({ children }: { children: React.ReactNode }) {
     const { connection } = useConnection();
-    const [provider, setProvider] = useState<Provider>();
+    const [provider, setProvider] = useState<AnchorProvider>();
     const [program, setProgram] = useState<Program<OgfLottery>>();
     useEffect(() => {
         const provider = new AnchorProvider(connection, (window as any).solana);

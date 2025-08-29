@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ogf_lottery.json`.
  */
 export type OgfLottery = {
-  "address": "BtZ6LuVh4nSDQvTVhb9JMm8aaq1nbj9YBJxN2CXK8MzB",
+  "address": "4m3mXCycberAPBPDWJEsejEMPy48Abfs8Hk5sp5ofmX5",
   "metadata": {
     "name": "ogfLottery",
     "version": "0.1.0",
@@ -221,6 +221,24 @@ export type OgfLottery = {
                   117,
                   116,
                   104
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "globalDataAccount",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
                 ]
               }
             ]
@@ -539,6 +557,10 @@ export type OgfLottery = {
         },
         {
           "name": "releaseAmount",
+          "type": "u64"
+        },
+        {
+          "name": "claimExpiryTime",
           "type": "u64"
         }
       ]
@@ -887,6 +909,10 @@ export type OgfLottery = {
           {
             "name": "bidder",
             "type": "pubkey"
+          },
+          {
+            "name": "time",
+            "type": "u64"
           }
         ]
       }
@@ -922,6 +948,10 @@ export type OgfLottery = {
           },
           {
             "name": "totalReleases",
+            "type": "u64"
+          },
+          {
+            "name": "claimExpiryTime",
             "type": "u64"
           }
         ]

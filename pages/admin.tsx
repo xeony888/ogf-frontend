@@ -17,19 +17,21 @@ export default function Admin() {
     const [releaseAmount, setReleaseAmount] = useState<number>(0);
     const [depositAmount, setDepositAmount] = useState<number>(0);
     const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
+    const [claimExpiryTime, setClaimExpiryTime] = useState<number>(0)
     useEffect(() => {
         if (globalDataAccount) {
             setFee(globalDataAccount.fee.toNumber())
             setReleaseLength(globalDataAccount.releaseLength.toNumber());
             setMaxTimeBetweenBids(globalDataAccount.maxTimeBetweenBids.toNumber());
             setReleaseAmount(globalDataAccount.releaseAmount.toNumber());
+            setClaimExpiryTime(globalDataAccount.claimExpiryTime.toNumber())
         }
     }, [globalDataAccount]);
 
     return (
         <div className="flex flex-col justify-center items-center gap-4 w-full h-full pt-2 bg-black">
             <BasicButton onClick={initialize} text="Initialize" disabled={initialized} />
-            <BasicButton onClick={() => modifyGlobalData(fee, releaseLength, maxTimeBetweenBids, releaseAmount)} text="Modify Global Data" />
+            <BasicButton onClick={() => modifyGlobalData(fee, releaseLength, maxTimeBetweenBids, releaseAmount, claimExpiryTime)} text="Modify Global Data" />
             <div className="flex flex-row justify-center items-center gap-2">
                 <div className="flex flex-col justify-center items-center gap-2">
                     <p>Base Fee:</p>
@@ -67,7 +69,15 @@ export default function Admin() {
                         onChange={(event: any) => setReleaseAmount(Number(event.target.value))}
                     />
                 </div>
-
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <p>Claim Expiry Time:</p>
+                    <StyledInput
+                        placeholder="Claim Expiry Time"
+                        type="number"
+                        value={claimExpiryTime}
+                        onChange={(event: any) => setClaimExpiryTime(Number(event.target.value))}
+                    />
+                </div>
             </div>
             <p>Token Mint: {globalDataAccount?.mint.toString()}</p>
             <p>Pool #: {globalDataAccount?.pools.toString()}</p>
