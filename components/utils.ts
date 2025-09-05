@@ -1,7 +1,7 @@
 import { BlockhashWithExpiryBlockHeight, Connection, LAMPORTS_PER_SOL, PublicKey, TransactionExpiredBlockheightExceededError, VersionedTransaction, VersionedTransactionResponse } from "@solana/web3.js";
 import BN from "bn.js";
 import promiseRetry from "promise-retry";
-
+export const ogfMint = "EQyRaajDZLEEdSrU8Hws29LWjDJczGKB1CV6jrWcZJn9"
 export function calculateReward(bids: BN, id: BN, amount: BN): BN {
     id = id.add(new BN(1))
     if (bids.eq(id) && id.eq(new BN(1))) {

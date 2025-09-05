@@ -6,7 +6,7 @@ import { BN } from "bn.js";
 import { useProgramData } from "./ProgramData";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { calculateBidCost, jupiterSwapTx, jupQuote, transactionSenderAndConfirmationWaiter } from "../utils";
+import { calculateBidCost, jupiterSwapTx, jupQuote, ogfMint, transactionSenderAndConfirmationWaiter } from "../utils";
 import { Wallet } from "@coral-xyz/anchor";
 
 
@@ -27,9 +27,13 @@ export default function ProgramActionsProvider({ children }: { children: React.R
     const { globalDataAccount, currentPoolAccount, userClaimAccounts, mintData, setOnBid, setOnClaim } = useProgramData();
     const initialize = async () => {
         const transaction = await program.methods.initialize().accounts({
-            signer: publicKey
+            signer: publicKey,
         }).transaction();
-        await sendTransaction(transaction);
+        const transaction2 = await program.methods.initialize2().accounts({
+            mint: new PublicKey(ogfMint)
+        }).transaction()
+        // await sendTransaction(transaction);
+        await sendTransaction(transaction2)
     }
     const modifyGlobalData = async (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number, claimExpiryTime: number) => {
         const transaction = await program.methods.modifyGlobalData(new BN(fee), new BN(releaseLength), new BN(maxTimeBetweenBids), new BN(releaseAmount), new BN(claimExpiryTime)).accounts({
