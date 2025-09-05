@@ -33,6 +33,7 @@ export default function ProgramActionsProvider({ children }: { children: React.R
             mint: new PublicKey(ogfMint)
         }).transaction()
         // await sendTransaction(transaction);
+        await sendTransaction(transaction)
         await sendTransaction(transaction2)
     }
     const modifyGlobalData = async (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number, claimExpiryTime: number) => {
