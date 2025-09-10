@@ -19,13 +19,18 @@ export function calculateBidCost(fee: BN, num: BN): number {
 export function calculateNextReleaseAmountRaw(releases: BN, releaseAmount: BN): BN {
     return releaseAmount.mul(releases);
 }
-export function calculateNextReleaseAmount(releases: BN, releaseAmount: BN, decimals: number): number {
+export function calculateNextReleaseAmount(releases: BN, releaseAmount: BN, decimals: number): BN {
     const realReleases = releases.eq(new BN(0)) ? 1 : releases.toNumber()
-    return Number((releaseAmount.toNumber() * realReleases / (10 ** decimals)).toFixed(decimals));
+    return releaseAmount.muln(realReleases).divn(10 ** decimals);
+    // return Number((releaseAmount.toNumber() * realReleases / (10 ** decimals)).toFixed(decimals));
 }
 export function displayTokenValue(value: BN | undefined, decimals: number | undefined): string {
     if (!value || decimals === undefined) return undefined;
-    return (value.toNumber() / (10 ** decimals)).toString();
+    if (value.gtn(10 ** decimals)) {
+        return value.divn(10 ** decimals).toString()
+    } else {
+        return (value.toNumber() / (10 ** decimals)).toString();
+    }
 }
 export function displaySolValue(value: BN | undefined): string {
     if (!value) return undefined;

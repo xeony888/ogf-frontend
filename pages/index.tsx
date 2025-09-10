@@ -71,8 +71,8 @@ export default function Home() {
     return calculateBidCost(globalDataAccount.fee, new BN(currentPoolAccount.bids));
   }, [currentPoolAccount, globalDataAccount]);
 
-  const nextReleaseAmount: number = useMemo(() => {
-    if (!currentPoolAccount || !globalDataAccount || !mintData) return 0;
+  const nextReleaseAmount: BN = useMemo(() => {
+    if (!currentPoolAccount || !globalDataAccount || !mintData) return new BN(0);
     return calculateNextReleaseAmount(globalDataAccount.totalReleases.add(new BN(1)), globalDataAccount.releaseAmount, mintData.decimals);
   }, [currentPoolAccount, globalDataAccount, mintData]);
   const onBid = async () => {
@@ -113,7 +113,7 @@ export default function Home() {
                     <Toggle checked={usingOgc} onChange={setUsingOgc} />
                   </div>
                   <div className="flex flex-col justify-center items-center gap-2">
-                    <p>{nextReleaseAmount} $OGF to be released in</p>
+                    <p>{nextReleaseAmount?.toString() ?? "0"} $OGF to be released in</p>
                     <Countdown timeLeft={currentPoolAccount?.releaseTime.sub(now).toNumber() || 0} />
                   </div>
                   <div className="flex flex-col justify-center items-center gap-2">
