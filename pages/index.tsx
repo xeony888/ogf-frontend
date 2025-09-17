@@ -12,7 +12,8 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import BN from "bn.js";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-
+import Chart from "@/components/Chart";
+import LeaderboardRow from "@/components/LeaderboardRow";
 
 
 type PageState = "INFO" | "BID" | "CLAIM" | "STATS"
@@ -25,8 +26,17 @@ export default function Home() {
   const [lotteryRewardUSD, setLotteryRewardUSD] = useState<string>("")
   const [solCostUSD, setSolCostUSD] = useState<string>("")
   const [usingOgc, setUsingOgc] = useState<boolean>(false)
-
+  const [chartData, setChartData] = useState<any[]>();
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([])
   const router = useRouter();
+  useEffect(() => {
+    (async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ogf-data`);
+      const data = await response.json()
+      setChartData(data.data)
+      setLeaderboardData(data.leaderboard)
+    })()
+  }, [])
   useEffect(() => {
     if (userData && currentPoolAccount && mintData) {
       (async () => {
@@ -99,7 +109,21 @@ export default function Home() {
           <div className="w-full h-full flex flex-col justify-between items-center gap-3 md:gap-6">
             <p className="uppercase text-4xl lg:text-6xl font-extrabold">{state}</p>
             {state === "STATS" ?
-              <></>
+              <div className="flex flex-col justify-center items-center w-full">
+                <Chart data={chartData} />
+                <div className="flex flex-col justify-center items-center">
+                  <div className="grid grid-cols-3 w-full">
+                    <p>Wallet</p>
+                    <p>$OGF Claimed</p>
+                    <p>Times Bid</p>
+                  </div>
+                  {leaderboardData.map((row, i) => (
+                    <div className="w-full" key={i}>
+                      <LeaderboardRow row={row} />
+                    </div>
+                  ))}
+                </div>
+              </div>
               :
               state === "BID" ?
                 <div className="flex flex-col justify-center items-center gap-2">

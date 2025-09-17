@@ -19,7 +19,8 @@
     "promise-retry": "^2.0.1",
     "react": "^18",
     "react-content-loader": "^7.0.2",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "recharts": "^3.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
