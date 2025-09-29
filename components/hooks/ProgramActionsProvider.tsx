@@ -100,23 +100,34 @@ export default function ProgramActionsProvider({ children }: { children: React.R
         await sendTransaction(transaction);
         setOnBid(epoch, didRelease);
     }
+
+
     const claim = async () => {
-        const transaction = new Transaction();
+        let transaction = new Transaction();
         const signerTokenAccountAddress = getAssociatedTokenAddressSync(globalDataAccount.mint, publicKey)
+        const create = createAssociatedTokenAccountIdempotentInstruction(
+            publicKey,
+            signerTokenAccountAddress,
+            publicKey,
+            globalDataAccount.mint,
+        );
+        transaction.add(create)
         for (const account of userClaimAccounts) {
-            const create = createAssociatedTokenAccountIdempotentInstruction(
-                publicKey,
-                signerTokenAccountAddress,
-                publicKey,
-                globalDataAccount.mint,
-            );
             const claim = await program.methods.claim(account.pool, account.bidId).accounts({
                 signer: publicKey,
                 signerTokenAccount: signerTokenAccountAddress
             }).transaction();
             transaction.add(create, claim);
-            if (transaction.instructions.length === 6) {
+            if (transaction.instructions.length >= 8) {
                 await sendTransaction(transaction);
+                transaction = new Transaction()
+                const create = createAssociatedTokenAccountIdempotentInstruction(
+                    publicKey,
+                    signerTokenAccountAddress,
+                    publicKey,
+                    globalDataAccount.mint,
+                );
+                transaction.add(create)
             }
         }
         if (transaction.instructions.length > 0) {
