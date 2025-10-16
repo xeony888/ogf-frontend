@@ -31,10 +31,16 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
     (async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ogf-data`);
-      const data = await response.json()
-      setChartData(data.data)
-      setLeaderboardData(data.leaderboard)
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ogf-data`);
+        console.log(await response.text())
+        const data = await response.json()
+        setChartData(data.data)
+        setLeaderboardData(data.leaderboard)
+      } catch (e) {
+        console.error(e);
+        console.log("Error fetching stats");
+      }
     })()
   }, [])
   useEffect(() => {

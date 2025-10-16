@@ -10,8 +10,14 @@ export default function Chart({ data }: { data: any; }) {
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="id" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <YAxis yAxisId="left" />
+                    <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                    />
+                    <YAxis
+                        yAxisId="left"
+                        label={{ value: "$OGF * 10^6", angle: -90, position: "insideLeft", offset: 10 }}
+                    />
                     <Tooltip />
                     <Legend />
                     <Line type="monotone" dataKey="totalBids" yAxisId="right" stroke="#82ca9d" />
@@ -21,8 +27,16 @@ export default function Chart({ data }: { data: any; }) {
             <ResponsiveContainer width={"50%"} height={300}>
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="id" />
-                    <YAxis yAxisId="right" orientation="right" />
+                    <XAxis
+                        dataKey="id"
+                        label={{ value: "$OGF * 10^6", angle: -90, position: "insideLeft", offset: 10 }}
+
+                    />
+                    <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                        label={{ value: "$OGF * 10^6", angle: -90, position: "insideLeft", offset: 10 }}
+                    />
                     <YAxis yAxisId="left" />
                     <Tooltip />
                     <Legend />
