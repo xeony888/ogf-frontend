@@ -33,7 +33,6 @@ export default function Home() {
     (async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/ogf-data`);
-        console.log(await response.text())
         const data = await response.json()
         setChartData(data.data)
         setLeaderboardData(data.leaderboard)
