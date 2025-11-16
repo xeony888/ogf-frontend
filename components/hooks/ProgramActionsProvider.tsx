@@ -8,7 +8,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { calculateBidCost, jupiterSwapTx, jupQuote, ogfMint, transactionSenderAndConfirmationWaiter } from "../utils";
 import { Wallet } from "@coral-xyz/anchor";
-
+import bs58 from "bs58";
 
 type ProgramActionsProps = {
     initialize: () => Promise<void>,
@@ -24,7 +24,7 @@ export default function ProgramActionsProvider({ children }: { children: React.R
     const { program, provider } = useProgram();
     const { sendTransaction } = useTransactionSend();
     const { connection } = useConnection()
-    const { globalDataAccount, currentPoolAccount, userClaimAccounts, mintData, setOnBid, setOnClaim } = useProgramData();
+    const { globalDataAccount, currentPoolAccount, userBidAccounts, mintData, setOnBid, setOnClaim } = useProgramData();
     const initialize = async () => {
         const transaction = await program.methods.initialize().accounts({
             signer: publicKey,
@@ -32,7 +32,6 @@ export default function ProgramActionsProvider({ children }: { children: React.R
         const transaction2 = await program.methods.initialize2().accounts({
             mint: new PublicKey(ogfMint)
         }).transaction()
-        // await sendTransaction(transaction);
         await sendTransaction(transaction)
         await sendTransaction(transaction2)
     }
@@ -76,22 +75,40 @@ export default function ProgramActionsProvider({ children }: { children: React.R
             const release = await program.methods.release(globalDataAccount.pools + 1).accounts({
                 signer: publicKey
             }).transaction();
+            const create = await program.methods.createBid(globalDataAccount.pools + 1, 0).accounts({
+                signer: publicKey
+            }).transaction()
             const bid = await program.methods.bid(globalDataAccount.pools + 1, 0).accounts({
                 signer: publicKey
             }).transaction();
-            transaction.add(newPool, release, bid);
+            transaction.add(newPool, release, create, bid);
         } else {
+            // const userBidAccounts = await program.account.bidAccount.all([
+            //     {
+            //         memcmp: {
+            //             offset: 8 + 2 + 2,
+            //             bytes: publicKey.toBase58()
+            //         }
+            //     },
+            //     {
+            //         memcmp: {
+            //             offset: 8,
+            //             bytes: bs58.encode(new BN(globalDataAccount.pools).toArrayLike(Buffer, "le", 2))
+            //         }
+            //     }
+            // ])
+            // possibly create extra accounts here
             if (time.gt(currentPoolAccount.releaseTime)) {
                 didRelease = true;
                 const release = await program.methods.release(globalDataAccount.pools).accounts({
                     signer: publicKey
                 }).transaction();
-                const bid = await program.methods.bid(globalDataAccount.pools, currentPoolAccount.bids).accounts({
+                const bid = await program.methods.bid(globalDataAccount.pools, 0).accounts({
                     signer: publicKey
                 }).transaction();
                 transaction.add(release, bid);
             } else {
-                const bid = await program.methods.bid(globalDataAccount.pools, currentPoolAccount.bids).accounts({
+                const bid = await program.methods.bid(globalDataAccount.pools, 0).accounts({
                     signer: publicKey
                 }).transaction();
                 transaction.add(bid);
@@ -112,8 +129,8 @@ export default function ProgramActionsProvider({ children }: { children: React.R
             globalDataAccount.mint,
         );
         transaction.add(create)
-        for (const account of userClaimAccounts) {
-            const claim = await program.methods.claim(account.pool, account.bidId).accounts({
+        for (const account of userBidAccounts) {
+            const claim = await program.methods.claim(account.pool, account.accountId).accounts({
                 signer: publicKey,
                 signerTokenAccount: signerTokenAccountAddress
             }).transaction();

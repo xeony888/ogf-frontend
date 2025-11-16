@@ -24,10 +24,11 @@ type PoolAccount = {
     releaseTime: InstanceType<typeof BN>,
     balance: InstanceType<typeof BN>,
 }
-type ClaimAccount = {
+type BidAccount = {
     bidder: PublicKey,
     pool: number,
-    bidId: number,
+    accountId: number,
+    bidIds: number[],
 }
 type UserData = {
     currentReward: InstanceType<typeof BN>,
@@ -40,7 +41,7 @@ type ProgramDataProps = {
     globalDataAccount: GlobalData,
     currentPoolAccount: PoolAccount,
     programTokenBalance: bigint,
-    userClaimAccounts: ClaimAccount[],
+    userBidAccounts: BidAccount[],
     mintData: Mint,
     userData: UserData,
     amountToClaim: InstanceType<typeof BN>,
@@ -55,7 +56,7 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
     const [globalDataAccount, setGlobalDataAccount] = useState<GlobalData>();
     const [currentPoolAccount, setCurrentPoolAccount] = useState<PoolAccount>();
     const [programTokenBalance, setProgramTokenBalance] = useState<bigint>(BigInt(0));
-    const [userClaimAccounts, setUserClaimAccounts] = useState<ClaimAccount[]>([]);
+    const [userBidAccounts, setUserBidAccounts] = useState<BidAccount[]>([]);
     const [amountToClaim, setAmountToClaim] = useState<InstanceType<typeof BN>>(new BN(0));
     const [mintData, setMintData] = useState<Mint>();
     const [userData, setUserData] = useState<UserData>(DEFAULT_USER_DATA);
@@ -108,10 +109,15 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                         }
                     }
                 ]);
+                let poolAccounts = await program.account.pool.all();
                 const currentAccounts = claimAccounts.filter((account) => account.account.pool === globalDataAccount.pools);
                 let currentReward = new BN(0);
                 for (const account of currentAccounts) {
-                    const amount = calculateReward(new BN(currentPoolAccount.bids), new BN(account.account.bidId), currentPoolAccount.balance);
+                    let amount: InstanceType<typeof BN> = new BN(0);
+                    for (const bidId of account.account.bidIds) {
+                        const result = calculateReward(new BN(currentPoolAccount.bids), new BN(bidId), currentPoolAccount.balance);
+                        amount = amount.add(result)
+                    }
                     currentReward = currentReward.add(amount);
                 }
                 setUserData(userData => {
@@ -120,7 +126,8 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 claimAccounts = claimAccounts.filter((account) => account.account.pool !== globalDataAccount.pools);
                 let amountToClaim = new BN(0);
                 for (const account of claimAccounts) {
-                    if (account.account.time.add(globalDataAccount.claimExpiryTime).gtn(Math.floor(Date.now() / 1000))) {
+                    const poolAccount = poolAccounts.find(acc => acc.account.id === account.account.pool);
+                    if (poolAccount.account.bidDeadline.add(globalDataAccount.claimExpiryTime).gtn(Math.floor(Date.now() / 1000))) {
                         let poolAccount = poolsMap.get(account.account.pool);
                         if (!poolAccount) {
                             const [poolAddress] = PublicKey.findProgramAddressSync(
@@ -130,12 +137,15 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                             poolAccount = await program.account.pool.fetch(poolAddress);
                             poolsMap.set(account.account.pool, poolAccount);
                         }
-
-                        const amount = calculateReward(new BN(poolAccount.bids), new BN(account.account.bidId), poolAccount.balance);
+                        let amount: InstanceType<typeof BN> = new BN(0);
+                        for (const bidId of account.account.bidIds) {
+                            const reward = calculateReward(new BN(poolAccount.bids), new BN(bidId), poolAccount.balance);
+                            amount = amount.add(reward);
+                        }
                         amountToClaim = amountToClaim.add(amount);
                     }
                 }
-                setUserClaimAccounts(claimAccounts.map(account => account.account));
+                setUserBidAccounts(claimAccounts.map(account => account.account));
                 setAmountToClaim(amountToClaim);
             })();
         }
@@ -196,7 +206,7 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
             globalDataAccount,
             programTokenBalance,
             currentPoolAccount,
-            userClaimAccounts,
+            userBidAccounts,
             amountToClaim,
             mintData,
             userData,
