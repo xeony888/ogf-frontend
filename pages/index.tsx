@@ -158,6 +158,7 @@ export default function Home() {
                   </div>
                   :
                   <div className="flex flex-col justify-between items-center text-center w-full h-full">
+                    <p>DEVNET TEST MODE ACTIVATED</p>
                     <p>
                       Welcome to the OG Lottery. The Lottery dispenses <ImportantSpan>$OGF</ImportantSpan>, the primal degeneracy of the Realm.
                     </p>
