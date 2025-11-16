@@ -32,8 +32,18 @@ export default function ProgramActionsProvider({ children }: { children: React.R
         const transaction2 = await program.methods.initialize2().accounts({
             mint: new PublicKey(ogfMint)
         }).transaction()
-        await sendTransaction(transaction)
-        await sendTransaction(transaction2)
+        try {
+            await sendTransaction(transaction)
+        } catch (e) {
+            console.error(e);
+            console.error("Error sending 1st initialize")
+        }
+        try {
+            await sendTransaction(transaction2)
+        } catch (e) {
+            console.error(e);
+            console.error("Error sending 2nd transaction")
+        }
     }
     const modifyGlobalData = async (fee: number, releaseLength: number, maxTimeBetweenBids: number, releaseAmount: number, claimExpiryTime: number) => {
         const transaction = await program.methods.modifyGlobalData(new BN(fee), new BN(releaseLength), new BN(maxTimeBetweenBids), new BN(releaseAmount), new BN(claimExpiryTime)).accounts({
