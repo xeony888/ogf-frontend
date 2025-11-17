@@ -93,21 +93,26 @@ export default function ProgramActionsProvider({ children }: { children: React.R
             }).transaction();
             transaction.add(newPool, release, create, bid);
         } else {
-            // const userBidAccounts = await program.account.bidAccount.all([
-            //     {
-            //         memcmp: {
-            //             offset: 8 + 2 + 2,
-            //             bytes: publicKey.toBase58()
-            //         }
-            //     },
-            //     {
-            //         memcmp: {
-            //             offset: 8,
-            //             bytes: bs58.encode(new BN(globalDataAccount.pools).toArrayLike(Buffer, "le", 2))
-            //         }
-            //     }
-            // ])
-            // possibly create extra accounts here
+            const userBidAccounts = await program.account.bidAccount.all([
+                {
+                    memcmp: {
+                        offset: 8 + 2 + 2,
+                        bytes: publicKey.toBase58()
+                    }
+                },
+                {
+                    memcmp: {
+                        offset: 8,
+                        bytes: bs58.encode(new BN(globalDataAccount.pools).toArrayLike(Buffer, "le", 2))
+                    }
+                }
+            ])
+            if (userBidAccounts.length === 0) {
+                const createBid = await program.methods.createBid(globalDataAccount.pools, 0).accounts({
+                    signer: publicKey
+                }).transaction();
+                transaction.add(createBid);
+            }
             if (time.gt(currentPoolAccount.releaseTime)) {
                 didRelease = true;
                 const release = await program.methods.release(globalDataAccount.pools).accounts({
