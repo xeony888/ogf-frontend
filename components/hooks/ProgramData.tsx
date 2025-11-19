@@ -114,8 +114,10 @@ export function ProgramDataProvider({ children }: { children: React.ReactNode })
                 let currentReward = new BN(0);
                 for (const account of currentAccounts) {
                     let amount: InstanceType<typeof BN> = new BN(0);
+                    console.log("bidIds: ", account.account.bidIds);
                     for (const bidId of account.account.bidIds) {
                         const result = calculateReward(new BN(currentPoolAccount.bids), new BN(bidId), currentPoolAccount.balance);
+                        console.log(`Reward for ${bidId}/${currentPoolAccount.bids} = ${result.toNumber()}`)
                         amount = amount.add(result)
                     }
                     currentReward = currentReward.add(amount);

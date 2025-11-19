@@ -4,7 +4,6 @@ import promiseRetry from "promise-retry";
 
 export const ogfMint = process.env.NEXT_PUBLIC_OGF_MINT
 export function calculateReward(bids: BN, id: BN, amount: BN): BN {
-    id = id.add(new BN(1))
     if (bids.eq(id) && id.eq(new BN(1))) {
         return amount
     }
